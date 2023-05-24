@@ -1,0 +1,5 @@
+R1: "/home/dieterbest/Analysis/wgs_pipeline/data/ERR552797_1.fastq.gz"
+R2: "/home/dieterbest/Analysis/wgs_pipeline/data/ERR552797_1.fastq.gz"
+REF: "/home/dieterbest/Analysis/varpipe3/tools/ref2.fa"
+SAMPL: "ERR552797"
+
