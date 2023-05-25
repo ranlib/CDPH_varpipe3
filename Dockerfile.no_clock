@@ -19,7 +19,7 @@ RUN printf '#!/bin/bash \
 
 RUN wget -q https://snpeff.blob.core.windows.net/versions/snpEff_latest_core.zip && unzip snpEff_latest_core.zip
 RUN printf '#!/bin/bash \
-\njava -jar /snpEff/snpEff.jar $@"\n' > /usr/local/bin/snpEff && chmod u+x /usr/local/bin/snpEff
+\njava -jar /snpEff/snpEff.jar "$@"\n' > /usr/local/bin/snpEff && chmod u+x /usr/local/bin/snpEff
 
 RUN wget -q https://github.com/broadinstitute/gatk/releases/download/4.2.4.1/gatk-4.2.4.1.zip && unzip gatk-4.2.4.1.zip
 
