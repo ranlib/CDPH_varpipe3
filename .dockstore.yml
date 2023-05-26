@@ -1,6 +1,6 @@
 version: 1.0
 workflows:
    - subclass: WDL
-     primaryDescriptorPath: /varpipe.wdl
+     primaryDescriptorPath: /data/varpipe.wdl
      testParameterFiles:
-     - /varpipe.yaml
+     - /data/varpipe.yaml
