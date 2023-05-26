@@ -6,12 +6,16 @@ task RunVarpipeline {
     File R2
     File REF
     String SAMPL
+    Int threads = 1
+    String genome = "NC_000962"
   }
   command {
-    Varpipeline -q ${R1} -q2 ${R2} -r ${REF} -g NC_000962 -n ${SAMPL} -v -a -k
+    Varpipeline -q ${R1} -q2 ${R2} -r ${REF} -g ${genome} -n ${SAMPL} -t ${threads} -v -a -k
   }
   runtime {
     docker: "dbest/varpipe3:latest"
+    cpu: 8
+    memory: "10 GB"
   }
 }
 
@@ -21,12 +25,16 @@ workflow WfVarPipeline {
     File R2
     File REF
     String SAMPL
+    Int threads = 1
+    String genome = "NC_000962"
   }
   call RunVarpipeline {
     input:
     R1 = R1,
     R2 = R2,
     REF = REF,
-    SAMPL = SAMPL
+    SAMPL = SAMPL,
+    threads = threads,
+    genome = genome
   }
 }
