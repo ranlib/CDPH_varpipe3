@@ -329,12 +329,12 @@ class snp:
         cwd = os.getcwd()
         if self.__finalVCF:
             self.__ifVerbose("Annotating final VCF.")
-            self.__annotation = self.fOut + "/" + self.name + "_DR_loci_raw_annotation.txt"
+            self.__annotation = self.fOut + "/" + self.name + "_DR_loci_raw_annotation.vcf"
             self.__CallCommand(["SnpEff", self.__annotation], ["snpEff", "-nodownload", "-noLog", "-noStats", "-c", self.__snpeff_database, self.reference_name, self.__finalVCF])
 
         if self.__fullVCF:
             self.__ifVerbose("Annotating full VCF.")
-            self.__full_annotation = self.fOut + "/" + self.name + "_full_raw_annotation.txt"
+            self.__full_annotation = self.fOut + "/" + self.name + "_full_raw_annotation.vcf"
             self.__CallCommand(["SnpEff", self.__full_annotation], ["snpEff", "-nodownload", "-noLog", "-noStats", "-c", self.__snpeff_database, self.reference_name, self.__fullVCF])
 
             self.__ifVerbose("Parsing final Annotation.")
