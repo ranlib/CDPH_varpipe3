@@ -24,6 +24,7 @@ class snp:
         self.input2 = input2
         self.verbose = verbose
         self.reference = reference
+        self.reference_name = reference_name
         self.__lineage = os.path.join(self.fOut, self.name + ".lineage_report.txt")
         self.__finalVCF = ""
         self.__fullVCF = ""
@@ -316,6 +317,7 @@ class snp:
 
             if not self.__finalVCF:
                 self.__finalVCF = GATKdir + "/" + self.name + "_filter.vcf"
+                
             if not self.__fullVCF:
                 self.__fullVCF = GATKdir + "/" + self.name + "_full_filter.vcf"
         else:
@@ -327,17 +329,20 @@ class snp:
         cwd = os.getcwd()
         if self.__finalVCF:
             self.__ifVerbose("Annotating final VCF.")
-            self.__CallCommand(["SnpEff", self.fOut + "/" + self.name + "_DR_loci_raw_annotation.txt"], ["snpEff", "-c", self.__snpeff_database, "NC_000962", self.__finalVCF])
             self.__annotation = self.fOut + "/" + self.name + "_DR_loci_raw_annotation.txt"
+            self.__CallCommand(["SnpEff", self.__annotation], ["snpEff", "-nodownload", "-noLog", "-noStats", "-c", self.__snpeff_database, self.reference_name, self.__finalVCF])
+
         if self.__fullVCF:
             self.__ifVerbose("Annotating full VCF.")
-            self.__CallCommand(["SnpEff", self.fOut + "/" + self.name + "_full_raw_annotation.txt"], ["snpEff", "-c", self.__snpeff_database, "NC_000962", self.__fullVCF])
             self.__full_annotation = self.fOut + "/" + self.name + "_full_raw_annotation.txt"
+            self.__CallCommand(["SnpEff", self.__full_annotation], ["snpEff", "-nodownload", "-noLog", "-noStats", "-c", self.__snpeff_database, self.reference_name, self.__fullVCF])
+
             self.__ifVerbose("Parsing final Annotation.")
-            self.__CallCommand(["create annotation", self.fOut + "/" + self.name + "_DR_loci_annotation.txt"], ["python", self.__creater, self.__annotation, self.name])
-            self.__CallCommand(["create annotation", self.fOut + "/" + self.name + "_full_annotation.txt"], ["python", self.__creater, self.__full_annotation, self.name])
-            self.__CallCommand(["parse annotation", self.fOut + "/" + self.name + "_DR_loci_Final_annotation.txt"], ["python", self.__parser, self.__annotation, self.mutationloci, self.name])
-            self.__CallCommand(["parse annotation", self.fOut + "/" + self.name + "_full_Final_annotation.txt"], ["python", self.__parser, self.__full_annotation, self.mutationloci, self.name])
+            self.__CallCommand(["create annotation", self.fOut + "/" + self.name + "_DR_loci_annotation.txt"], [self.__creater, self.__annotation, self.name])
+            self.__CallCommand(["create annotation", self.fOut + "/" + self.name + "_full_annotation.txt"], [self.__creater, self.__full_annotation, self.name])
+
+            self.__CallCommand(["parse annotation", self.fOut + "/" + self.name + "_DR_loci_Final_annotation.txt"], [self.__parser, self.__annotation, self.mutationloci, self.name])
+            self.__CallCommand(["parse annotation", self.fOut + "/" + self.name + "_full_Final_annotation.txt"], [self.__parser, self.__full_annotation, self.mutationloci, self.name])
         else:
             self.__ifVerbose("Use SamTools, GATK, or Freebayes to annotate the final VCF.")
         # self.__CallCommand('rm', ['rm',  cwd + "/snpEff_genes.txt"])
