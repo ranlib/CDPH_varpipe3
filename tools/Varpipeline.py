@@ -114,7 +114,6 @@ class snp:
         self.__print_report = cfg["scripts"]["print_report"]
         self.__threads = cfg["other"]["threads"]
 
-    """ Shell Execution Functions """
 
     def __CallCommand(self, program, command):
         """Allows execution of a simple command."""
@@ -139,18 +138,19 @@ class snp:
                 self.__logFH.write("Standard Error: \n" + err.decode() + "\n\n")
         return 1
 
-    """ Clockwork Decontamination """
 
     def runClockwork(self):
+        """Clockwork Decontamination"""
         self.__ifVerbose("Performing clockwork decontamination.")
         if self.paired:
             self.__CallCommand("nextflow remove contamination", [self.__nextflow, "run", self.__remove_contam, "--ref_fasta", self.__ref_fasta, "--ref_metadata_tsv", self.__ref_metadata, "--reads_in1", self.input, "--reads_in2", self.input2, "--outprefix", self.clockwork + "/" + self.name, "--mapping_threads", self.__threads])
             self.input = self.clockwork + "/" + self.name + ".remove_contam.1.fq.gz"
             self.input2 = self.clockwork + "/" + self.name + ".remove_contam.2.fq.gz"
 
-    """ QC Trimmomatic """
+
 
     def runTrimmomatic(self):
+        """QC Trimmomatic"""
         self.__ifVerbose("Performing trimmomatic trimming.")
         if self.paired:
             self.__CallCommand("trimmomatic", ["trimmomatic", "PE", "-threads", self.__threads, "-trimlog", self.trimmomatic + "/" + "trimLog.txt", self.input, self.input2, self.trimmomatic + "/" + self.name + "_paired_1.fastq.gz", self.trimmomatic + "/" + self.name + "_unpaired_1.fastq.gz", self.trimmomatic + "/" + self.name + "_paired_2.fastq.gz", self.trimmomatic + "/" + self.name + "_unpaired_2.fastq.gz", "LEADING:3", "TRAILING:3", "SLIDINGWINDOW:4:15", "MINLEN:40"])
@@ -162,8 +162,6 @@ class snp:
             self.input2 = self.trimmomatic + "/" + self.name + "_paired_2.fastq.gz"
         else:
             self.input = self.trimmomatic + "/" + self.name + "_paired.fastq.gz"
-
-    """ Aligners """
 
     def runBWA(self, bwa):
         """Align reads against the reference using bwa."""
@@ -288,9 +286,9 @@ class snp:
                 # self.__CallCommand('mv', ['mv', self.fOut, self.qlog])
                 # sys.exit(1)
 
-    """ Callers """
 
     def runGATK(self):
+        """Variant Callers"""
         if os.path.isfile(self.__finalBam):
             self.__ifVerbose("Calling SNPs/InDels with GATK.")
             self.__logFH.write("########## Calling SNPs/InDels with Mutect2. ##########\n")
@@ -391,6 +389,6 @@ class snp:
                 self.__CallCommand("mv", ["mv", self.fOut, self.qlog])
 
     def __ifVerbose(self, msg):
-        """If verbose print a given message."""
+        """If verbose print a given message"""
         if self.verbose:
             print(msg)
