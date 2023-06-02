@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 """
-
+Varpipeline
 """
 import subprocess
 import os
@@ -192,12 +192,15 @@ class snp:
 
     def __bwaLongReads(self, out):
         """Make use of bwa mem"""
+        read_group = "@RG\\tID:" + self.name + "\\tSM:" + self.name + "\\tPL:ILLUMINA"
         if self.paired:
             self.__ifVerbose("   Running BWA mem on paired end reads.")
-            self.__CallCommand("bwa mem", ["bwa", "mem", "-t", str(self.__threads), "-R", "@RG\\tID:" + self.name + "\\tSM:" + self.name + "\\tPL:ILLUMINA", "-o", self.__alnSam, self.reference, self.input, self.input2])
+            command = f"bwa mem -t {str(self.__threads)} -K 10000000 -c 100 -M -T 50 -R {read_group} -o {self.__alnSam} {self.reference} {self.input} {self.input2}"
+            self.__CallCommand("bwa mem", command.split())
         else:
             self.__ifVerbose("   Running BWA mem on single end reads.")
-            self.__CallCommand(["bwa mem", self.__alnSam], ["bwa", "mem", "-t", str(self.__threads), "-R", "@RG\\tID:" + self.name + "\\tSM:" + self.name + "\\tPL:ILLUMINA", self.reference, self.input])
+            command = f"bwa mem -t {str(self.__threads)} -K 10000000 -c 100 -M -T 50 -R {read_group} -o {self.__alnSam} {self.reference} {self.input}"
+            self.__CallCommand("bwa mem", command.split())
 
     def __processAlignment(self):
         """Filter alignment using GATK and Picard-Tools"""
@@ -260,14 +263,11 @@ class snp:
         self.__CallCommand(["bedtools coverage", samDir + "/bed_2_coverage.txt"], ["bedtools", "coverage", "-b", self.__finalBam, "-a", self.__bedlist_two])
         self.__CallCommand(["sort", samDir + "/bed_1_sorted_coverage.txt"], ["sort", "-nk", "6", samDir + "/bed_1_coverage.txt"])
         self.__CallCommand(["sort", samDir + "/bed_2_sorted_coverage.txt"], ["sort", "-nk", "6", samDir + "/bed_2_coverage.txt"])
-
-        print((" ".join(["python", self.__target_estimator, self.__bedlist_amp, samDir + "/coverage.txt", self.name])))
-
         self.__CallCommand(["target region coverage estimator", samDir + "/target_region_coverage_amp.txt"], ["python", self.__target_estimator, self.__bedlist_amp, samDir + "/coverage.txt", self.name])
         self.__CallCommand(["sort", self.fOut + "/" + self.name + "_target_region_coverage.txt"], ["sort", "-nk", "3", samDir + "/target_region_coverage_amp.txt"])
         self.__CallCommand(["genome stats estimator", samDir + "/" + self.name + "_genome_stats.txt"], ["python", self.__genome_stats_estimator, samDir + "/coverage.txt", self.name])
-        self.__CallCommand(["genome region coverage estimator", samDir + "/genome_region_coverage_1.txt"], ["python", self.__genome_coverage_estimator, samDir + "/bed_1_sorted_coverage.txt", samDir + "/coverage.txt", self.name])
-        self.__CallCommand(["genome region coverage estimator", samDir + "/genome_region_coverage_2.txt"], ["python", self.__genome_coverage_estimator, samDir + "/bed_2_sorted_coverage.txt", samDir + "/coverage.txt", self.name])
+        self.__CallCommand(["genome coverage estimator", samDir + "/genome_region_coverage_1.txt"], ["python", self.__genome_coverage_estimator, samDir + "/bed_1_sorted_coverage.txt", samDir + "/coverage.txt", self.name])
+        self.__CallCommand(["genome coverage estimator", samDir + "/genome_region_coverage_2.txt"], ["python", self.__genome_coverage_estimator, samDir + "/bed_2_sorted_coverage.txt", samDir + "/coverage.txt", self.name])
         self.__CallCommand(["cat", samDir + "/genome_region_coverage.txt"], ["cat", samDir + "/genome_region_coverage_1.txt", samDir + "/genome_region_coverage_2.txt"])
         self.__CallCommand(["sort", self.fOut + "/" + self.name + "_genome_region_coverage.txt"], ["sort", "-nk", "3", samDir + "/genome_region_coverage.txt"])
         self.__CallCommand("sed", ["sed", "-i", "1d", self.fOut + "/" + self.name + "_genome_region_coverage.txt"])
@@ -297,6 +297,13 @@ class snp:
             GATKdir = os.path.join(self.outdir, "GATK")
             samDir = os.path.join(self.outdir, "SamTools")
 
+            """ Set final VCF file. """
+            if not self.__finalVCF:
+                self.__finalVCF = GATKdir + "/" + self.name + "_filter.vcf"
+                
+            if not self.__fullVCF:
+                self.__fullVCF = GATKdir + "/" + self.name + "_full_filter.vcf"
+
             """ Call SNPs/InDels with Mutect2 """
             self.__ifVerbose("   Running Mutect2.")
             self.__CallCommand("Mutect2", ["gatk", "Mutect2", "-R", self.reference, "-I", self.__finalBam, "-O", GATKdir + "/mutect.vcf", "--max-mnp-distance", "2", "-L", self.__included])
@@ -309,20 +316,12 @@ class snp:
             self.__CallCommand("LeftAlignAndTrimVariants", ["gatk", "LeftAlignAndTrimVariants", "-R", self.reference, "-V", GATKdir + "/full_mutect.vcf", "-O", GATKdir + "/full_gatk_mutect.vcf", "--split-multi-allelics"])
             self.__CallCommand("mv", ["mv", GATKdir + "/full_gatk_mutect.vcf", GATKdir + "/full_mutect.vcf"])
 
-            self.__CallCommand("FilterMutectCalls", ["gatk", "FilterMutectCalls", "-R", self.reference, "-V", GATKdir + "/mutect.vcf", "--min-reads-per-strand", "1", "--min-median-read-position", "10", "--min-allele-fraction", "0.01", "--microbial-mode", "true", "-O", GATKdir + "/" + self.name + "_filter.vcf"])
+            self.__CallCommand("FilterMutectCalls", ["gatk", "FilterMutectCalls", "-R", self.reference, "-V", GATKdir + "/mutect.vcf", "--min-reads-per-strand", "1", "--min-median-read-position", "10", "--min-allele-fraction", "0.01", "--microbial-mode", "true", "-O", self.__finalVCF])
 
-            self.__CallCommand("FilterMutectCalls", ["gatk", "FilterMutectCalls", "-R", self.reference, "-V", GATKdir + "/full_mutect.vcf", "--min-reads-per-strand", "1", "--min-median-read-position", "10", "--min-allele-fraction", "0.01", "--microbial-mode", "true", "-O", GATKdir + "/" + self.name + "_full_filter.vcf"])
+            self.__CallCommand("FilterMutectCalls", ["gatk", "FilterMutectCalls", "-R", self.reference, "-V", GATKdir + "/full_mutect.vcf", "--min-reads-per-strand", "1", "--min-median-read-position", "10", "--min-allele-fraction", "0.01", "--microbial-mode", "true", "-O", self.__fullVCF])
 
-            """ Set final VCF file. """
-
-            if not self.__finalVCF:
-                self.__finalVCF = GATKdir + "/" + self.name + "_filter.vcf"
-                
-            if not self.__fullVCF:
-                self.__fullVCF = GATKdir + "/" + self.name + "_full_filter.vcf"
         else:
-            # print error
-            pass
+            print("<E> no bam file found")
 
     def annotateVCF(self):
         """Annotate the final VCF file"""
@@ -332,16 +331,17 @@ class snp:
             self.__annotation = self.fOut + "/" + self.name + "_DR_loci_raw_annotation.vcf"
             self.__CallCommand(["SnpEff", self.__annotation], ["snpEff", "-nodownload", "-noLog", "-noStats", "-c", self.__snpeff_database, self.reference_name, self.__finalVCF])
 
+            self.__ifVerbose("Parsing final Annotation.")
+            self.__CallCommand(["create annotation", self.fOut + "/" + self.name + "_DR_loci_annotation.txt"], [self.__creater, self.__annotation, self.name])
+            self.__CallCommand(["parse annotation", self.fOut + "/" + self.name + "_DR_loci_Final_annotation.txt"], [self.__parser, self.__annotation, self.mutationloci, self.name])
+
         if self.__fullVCF:
             self.__ifVerbose("Annotating full VCF.")
             self.__full_annotation = self.fOut + "/" + self.name + "_full_raw_annotation.vcf"
             self.__CallCommand(["SnpEff", self.__full_annotation], ["snpEff", "-nodownload", "-noLog", "-noStats", "-c", self.__snpeff_database, self.reference_name, self.__fullVCF])
 
-            self.__ifVerbose("Parsing final Annotation.")
-            self.__CallCommand(["create annotation", self.fOut + "/" + self.name + "_DR_loci_annotation.txt"], [self.__creater, self.__annotation, self.name])
+            self.__ifVerbose("Parsing full Annotation.")
             self.__CallCommand(["create annotation", self.fOut + "/" + self.name + "_full_annotation.txt"], [self.__creater, self.__full_annotation, self.name])
-
-            self.__CallCommand(["parse annotation", self.fOut + "/" + self.name + "_DR_loci_Final_annotation.txt"], [self.__parser, self.__annotation, self.mutationloci, self.name])
             self.__CallCommand(["parse annotation", self.fOut + "/" + self.name + "_full_Final_annotation.txt"], [self.__parser, self.__full_annotation, self.mutationloci, self.name])
         else:
             self.__ifVerbose("Use SamTools, GATK, or Freebayes to annotate the final VCF.")
@@ -352,14 +352,14 @@ class snp:
         """Run lineage Analysis"""
         self.__ifVerbose("Running Lineage Analysis")
         self.__full_final_annotation = self.fOut + "/" + self.name + "_full_Final_annotation.txt"
-        self.__CallCommand(["lineage parsing", self.fOut + "/" + self.name + "_Lineage.txt"], ["python", self.__lineage_parser, self.__lineages, self.__full_final_annotation, self.__lineage, self.name])
+        self.__CallCommand(["lineage parsing", self.fOut + "/" + self.name + "_Lineage.txt"], [self.__lineage_parser, self.__lineages, self.__full_final_annotation, self.__lineage, self.name])
 
     def runPrint(self):
         """Print analysis report"""
         self.__ifVerbose("Printing report")
-        self.__CallCommand(["create summary report", self.fOut + "/" + self.name + "_summary.txt"], ["python", self.__create_report, self.fOut + "/" + self.name + "_stats.txt", self.fOut + "/" + self.name + "_target_region_coverage.txt", self.fOut + "/" + self.name + "_DR_loci_Final_annotation.txt"])
-        self.__CallCommand(["run interpretation report", self.fOut + "/" + self.name + "_interpretation.txt"], ["python", self.__interpreter, self.__reported, self.fOut + "/" + self.name + "_summary.txt", self.fOut + "/" + self.name + "_structural_variants.txt", self.fOut + "/" + self.name + "_DR_loci_annotation.txt", self.fOut + "/" + self.name + "_target_region_coverage.txt", self.name])
-        self.__CallCommand("print pdf report", ["python", self.__print_report, self.fOut + "/" + self.name + "_summary.txt", self.fOut + "/" + self.name + "_report.pdf"])
+        self.__CallCommand(["create summary report", self.fOut + "/" + self.name + "_summary.txt"], [self.__create_report, self.fOut + "/" + self.name + "_stats.txt", self.fOut + "/" + self.name + "_target_region_coverage.txt", self.fOut + "/" + self.name + "_DR_loci_Final_annotation.txt"])
+        self.__CallCommand(["run interpretation report", self.fOut + "/" + self.name + "_interpretation.txt"], [self.__interpreter, self.__reported, self.fOut + "/" + self.name + "_summary.txt", self.fOut + "/" + self.name + "_structural_variants.txt", self.fOut + "/" + self.name + "_DR_loci_annotation.txt", self.fOut + "/" + self.name + "_target_region_coverage.txt", self.name])
+        self.__CallCommand("print pdf report", [self.__print_report, self.fOut + "/" + self.name + "_summary.txt", self.fOut + "/" + self.name + "_report.pdf"])
 
     def cleanUp(self):
         """Clean up the temporary files, and move them to a proper folder."""
