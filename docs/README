@@ -1,0 +1,2 @@
+1) amp_bed.txt and intervals.bed are the same: cut -f1-4 amp_bed.txt > intervals.bed
+   but need intervals.bed format for GATK
