@@ -330,7 +330,9 @@ class snp:
             self.__CallCommand(["SnpEff", self.__annotation], ["snpEff", "-nodownload", "-noLog", "-noStats", "-c", self.__snpeff_database, self.reference_name, self.__finalVCF])
 
             self.__ifVerbose("Parsing final Annotation.")
+            # translate vcf -> tsv file
             self.__CallCommand(["create annotation", self.fOut + "/" + self.name + "_DR_loci_annotation.txt"], [self.__creater, self.__annotation, self.name])
+            # vcf -> tsv + some manipulation
             self.__CallCommand(["parse annotation", self.fOut + "/" + self.name + "_DR_loci_Final_annotation.txt"], [self.__parser, self.__annotation, self.mutationloci, self.name])
 
         if self.__fullVCF:
