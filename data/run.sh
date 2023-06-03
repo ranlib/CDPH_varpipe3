@@ -3,7 +3,8 @@
 #
 # run varpipe
 #
-FASTQ=$HOME/Analysis/wgs_pipeline/data/
+#FASTQ=$HOME/Analysis/wgs_pipeline/data/
+FASTQ=$PWD
 R1=$FASTQ/ERR552797_1.fastq.gz
 R2=$FASTQ/ERR552797_2.fastq.gz
 R1=$FASTQ/ERR552797_30percent_1.fq.gz
