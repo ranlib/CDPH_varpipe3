@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-
 """ 
 The script accepts a SnpEff annotated VCF file and the sample ID name (string) as input options
 it parses files and creates a final annotation file

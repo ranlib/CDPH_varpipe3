@@ -16,10 +16,10 @@ scripts:
     creater: /create_annotation.py
     interpreter: /interprete.py
     reported: /reportable.txt
-    included: /intervals.bed
+    included: /tbdb_intervals.bed
     stats_estimator: /stats_estimator.py
     genome_stats_estimator: /genome_stats_estimator.py
-    bedlist_amp: /amp_bed.txt
+    bedlist_amp: /tbdb.bed
     bedlist_one: /bed_1.txt
     bedlist_two: /bed_2.txt
     bedstruct: /BED.txt
