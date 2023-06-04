@@ -1,16 +1,34 @@
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
-RUN apt-get update -y
-RUN apt-get install -y zlib1g-dev wget libbz2-dev liblzma-dev bzip2 make gcc libncurses5-dev \
- automake build-essential cmake curl gawk git gnuplot graphviz libarchive-dev libcurl4-gnutls-dev \
- libhts-dev libncursesw5-dev libvcflib-tools libssl-dev pkg-config python3 python3-dev python3-pip \
- python3-setuptools r-base-core rsync unzip tabix libssl-dev default-jre
-RUN apt-get install -y python-is-python3
-RUN apt-get install -y samtools bwa bedtools 
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+zlib1g-dev \
+wget \
+libbz2-dev \
+liblzma-dev \
+libncurses5-dev \
+automake \
+gnuplot \
+graphviz \
+libarchive-dev \
+libhts-dev \
+libncursesw5-dev \
+libvcflib-tools \
+libssl-dev \
+python3 python3-dev python3-pip python-is-python3 \
+r-base-core \
+bzip2 \
+unzip \
+tabix \
+default-jre \
+samtools=1.17 \
+bwa=0.7.17-r1188 \
+bedtools=2.31.0 \
+&& rm -rf /var/lib/apt/lists/*
+
 RUN pip install pyyaml fpdf
 
 RUN wget -q https://github.com/usadellab/Trimmomatic/files/5854859/Trimmomatic-0.39.zip && unzip Trimmomatic-0.39.zip
@@ -27,5 +45,3 @@ COPY ./tools /varpipe/tools
 WORKDIR /varpipe/data
 
 ENV PATH=$PATH:/varpipe/tools:/gatk-4.2.4.1
-
-CMD /bin/bash
