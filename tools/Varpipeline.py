@@ -7,11 +7,13 @@ import os
 from datetime import datetime
 import yaml
 
+
 class snp:
-    """ get variants """
+    """get variants"""
+
     def __init__(self, input, outdir, reference, reference_name, name, paired, input2, verbose, threads, argString):
         i = datetime.now()
-        self.name = name # sample name
+        self.name = name  # sample name
         self.flog = "Output_" + i.strftime("%m_%d_%Y")
         self.qlog = os.path.join(self.flog, "QC")
         self.fOut = os.path.join(self.flog, outdir)
@@ -114,7 +116,6 @@ class snp:
         self.__print_report = cfg["scripts"]["print_report"]
         self.__threads = cfg["other"]["threads"]
 
-
     def __CallCommand(self, program, command):
         """Allows execution of a simple command."""
         out = ""
@@ -138,7 +139,6 @@ class snp:
                 self.__logFH.write("Standard Error: \n" + err.decode() + "\n\n")
         return 1
 
-
     def runClockwork(self):
         """Clockwork Decontamination"""
         self.__ifVerbose("Performing clockwork decontamination.")
@@ -146,8 +146,6 @@ class snp:
             self.__CallCommand("nextflow remove contamination", [self.__nextflow, "run", self.__remove_contam, "--ref_fasta", self.__ref_fasta, "--ref_metadata_tsv", self.__ref_metadata, "--reads_in1", self.input, "--reads_in2", self.input2, "--outprefix", self.clockwork + "/" + self.name, "--mapping_threads", self.__threads])
             self.input = self.clockwork + "/" + self.name + ".remove_contam.1.fq.gz"
             self.input2 = self.clockwork + "/" + self.name + ".remove_contam.2.fq.gz"
-
-
 
     def runTrimmomatic(self):
         """QC Trimmomatic"""
@@ -159,8 +157,8 @@ class snp:
             unpaired1 = os.path.join(self.trimmomatic, self.name + "_unpaired_1.fastq.gz")
             unpaired2 = os.path.join(self.trimmomatic, self.name + "_unpaired_2.fastq.gz")
             command = f"trimmomatic PE -threads {self.__threads} -trimlog {trimlog} {self.input} {self.input2} {paired1} {unpaired1} {paired2} {unpaired2} LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:40"
-            self.__CallCommand("trimmomatic", command.split() )
-            #self.__CallCommand("rm", ["rm", self.trimmomatic + "/" + self.name + "_unpaired_1.fastq.gz", self.trimmomatic + "/" + self.name + "_unpaired_2.fastq.gz"])
+            self.__CallCommand("trimmomatic", command.split())
+            # self.__CallCommand("rm", ["rm", self.trimmomatic + "/" + self.name + "_unpaired_1.fastq.gz", self.trimmomatic + "/" + self.name + "_unpaired_2.fastq.gz"])
             self.input = paired1
             self.input2 = paired2
         else:
@@ -276,7 +274,7 @@ class snp:
         self.__CallCommand(["sort", self.fOut + "/" + self.name + "_genome_region_coverage.txt"], ["sort", "-nk", "3", samDir + "/genome_region_coverage.txt"])
         self.__CallCommand("sed", ["sed", "-i", "1d", self.fOut + "/" + self.name + "_genome_region_coverage.txt"])
         self.__CallCommand(["structural variant detector", self.fOut + "/" + self.name + "_structural_variants.txt"], [self.__structparser, self.__bedstruct, self.fOut + "/" + self.name + "_genome_region_coverage.txt", samDir + "/coverage.txt", self.name])
-        self.__CallCommand(["stats estimator", self.fOut + "/" + self.name + "_stats.txt"], [ self.__stats_estimator, samDir + "/unmapped.txt", samDir + "/mapped.txt", self.fOut + "/" + self.name + "_target_region_coverage.txt", self.name, samDir + "/" + self.name + "_genome_stats.txt"])
+        self.__CallCommand(["stats estimator", self.fOut + "/" + self.name + "_stats.txt"], [self.__stats_estimator, samDir + "/unmapped.txt", samDir + "/mapped.txt", self.fOut + "/" + self.name + "_target_region_coverage.txt", self.name, samDir + "/" + self.name + "_genome_stats.txt"])
         statsOut = self.fOut + "/" + self.name + "_stats.txt"
         fh20 = open(statsOut, "r")
         for lines in fh20:
@@ -292,7 +290,6 @@ class snp:
                 # self.__CallCommand('mv', ['mv', self.fOut, self.qlog])
                 # sys.exit(1)
 
-
     def runGATK(self):
         """Variant Callers"""
         if os.path.isfile(self.__finalBam):
@@ -304,7 +301,7 @@ class snp:
             """ Set final VCF file. """
             if not self.__finalVCF:
                 self.__finalVCF = os.path.join(GATKdir, self.name + "_filter.vcf")
-                
+
             if not self.__fullVCF:
                 self.__fullVCF = os.path.join(GATKdir, self.name + "_full_filter.vcf")
 
