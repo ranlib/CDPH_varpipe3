@@ -1,5 +1,5 @@
 R1: "/home/dieterbest/Analysis/wgs_pipeline/data/ERR552797_30percent_1.fq.gz"
-R2: "/home/dieterbest/Analysis/wgs_pipeline/data/ERR552797_30percent_1.fq.gz"
+R2: "/home/dieterbest/Analysis/wgs_pipeline/data/ERR552797_30percent_2.fq.gz"
 REF: "/home/dieterbest/Analysis/varpipe3/tools/NC_000962.3.fa"
 SAMPL: "ERR552797"
 threads: 4
