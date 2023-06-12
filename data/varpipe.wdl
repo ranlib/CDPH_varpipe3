@@ -8,14 +8,26 @@ task RunVarpipeline {
     String SAMPL
     Int threads = 1
     String genome = "NC_000962"
+    String memory = "10GB"
   }
   command {
     Varpipeline -q ${R1} -q2 ${R2} -r ${REF} -g ${genome} -n ${SAMPL} -t ${threads} -v -a -k
   }
   runtime {
     docker: "dbest/varpipe3:latest"
-    cpu: 8
-    memory: "10 GB"
+    cpu: threads
+    memory: memory
+  }
+  meta {
+    author: "Dieter Best"
+    email: "Dieter.Best@cdph.ca.gov"
+    description: "CDC TB profiler"
+  }
+  parameter_meta {
+    # Inputs:
+    R1: "Forward reads in read pair"
+    R2: "Reverse reads in read pair"
+    SAMPL: "Sample name"
   }
 }
 
