@@ -1,0 +1,36 @@
+tools:
+    bcftools: /home/dieterbest/Analysis/varpipe3/tools/bcftools
+    bedtools: /home/dieterbest/Analysis/varpipe3/tools/bedtools
+    bwa: /home/dieterbest/Analysis/varpipe3/tools/bwa
+    samtools: /home/dieterbest/Analysis/varpipe3/tools/samtools
+    picard: /home/dieterbest/Analysis/varpipe3/tools/picard.jar
+    trimmomatic: /home/dieterbest/Analysis/varpipe3/tools/trimmomatic-0.39.jar
+    gatk: /home/dieterbest/Analysis/varpipe3/tools/gatk-4.2.4.0/gatk 
+    annotator: /home/dieterbest/Analysis/varpipe3/tools/snpEff/snpEff.jar
+    nextflow: /home/dieterbest/Analysis/varpipe3/tools/clockwork-0.11.3/results/nextflow
+    remove_contam: /home/dieterbest/Analysis/varpipe3/tools/clockwork-0.11.3/nextflow/remove_contam.nf
+    ref_fasta: /home/dieterbest/Analysis/varpipe3/tools/clockwork-0.11.3/OUT/ref.fa
+    ref_metadata: /home/dieterbest/Analysis/varpipe3/tools/clockwork-0.11.3/OUT/remove_contam_metadata.tsv         
+scripts:
+    parser: /home/dieterbest/Analysis/varpipe3/tools/parse_annotation.py
+    creater: /home/dieterbest/Analysis/varpipe3/tools/create_annotation.py
+    interpreter: /home/dieterbest/Analysis/varpipe3/tools/interprete.py
+    reported: /home/dieterbest/Analysis/varpipe3/tools/reportable.txt
+    included: /home/dieterbest/Analysis/varpipe3/tools/tbdb_intervals.bed
+    stats_estimator: /home/dieterbest/Analysis/varpipe3/tools/stats_estimator.py
+    genome_stats_estimator: /home/dieterbest/Analysis/varpipe3/tools/genome_stats_estimator.py
+    bedlist_amp: /home/dieterbest/Analysis/varpipe3/tools/tbdb.bed
+    bedlist_one: /home/dieterbest/Analysis/varpipe3/tools/bed_1.txt
+    bedlist_two: /home/dieterbest/Analysis/varpipe3/tools/bed_2.txt
+    bedstruct: /home/dieterbest/Analysis/varpipe3/tools/BED.txt
+    snpeff_database: /home/dieterbest/Analysis/varpipe3/tools/snpEff_database/snpEff.config
+    target_coverage_estimator: /home/dieterbest/Analysis/varpipe3/tools/target_coverage_estimator.py
+    genome_coverage_estimator: /home/dieterbest/Analysis/varpipe3/tools/genome_coverage_estimator.py
+    mutationloci: /home/dieterbest/Analysis/varpipe3/tools/mutation_loci.txt
+    lineages: /home/dieterbest/Analysis/varpipe3/tools/lineage_markers.txt
+    lineage_parser: /home/dieterbest/Analysis/varpipe3/tools/lineage_parser.py
+    struct_parser: /home/dieterbest/Analysis/varpipe3/tools/structvar_parser.py
+    create_report: /home/dieterbest/Analysis/varpipe3/tools/create_report.py
+    print_report: /home/dieterbest/Analysis/varpipe3/tools/pdf_print.py
+other:
+    threads: '4'
